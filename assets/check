@@ -1,0 +1,53 @@
+#!/bin/bash
+
+set -e
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
+if [[ $(uname -s) = "Darwin" ]]; then
+    echo "This script doesn't work on macOS (due to different date command implementation)"
+    exit 1
+fi
+
+source $(dirname $0)/common.sh
+
+latest_create_event_timestamp=0
+latest_update_event_timestamp=0
+latest_delete_event_timestamp=0
+
+bosh events --action=create --object-type=deployment --after="${last_event}" --json > bosh_events_create_deployment.json
+bosh events --action=update --object-type=deployment --after="${last_event}" --json > bosh_events_update_deployment.json
+bosh events --action=delete --object-type=deployment --after="${last_event}" --json > bosh_events_delete_deployment.json
+
+# check for new deployments since last check
+creates_since_last_check=$(jq '.Tables[0].Rows | length' < bosh_events_create_deployment.json)
+if [[ ${creates_since_last_check} -gt 0 ]]; then
+    latest_create_event_date=$(jq -r '.Tables[0].Rows[0].time' < bosh_events_create_deployment.json)
+    latest_create_event_timestamp=$(/bin/date -d "${latest_create_event_date}" +%s)
+    last_event=${latest_create_event_date}
+fi
+
+# check for updates to existing deployments since last check
+updates_since_last_check=$(jq '.Tables[0].Rows | length' < bosh_events_update_deployment.json)
+if [[ ${updates_since_last_check} -gt 0 ]]; then
+    latest_update_event_date=$(jq -r '.Tables[0].Rows[0].time' < bosh_events_update_deployment.json)
+    latest_update_event_timestamp=$(date -d "${latest_update_event_date}" +%s)
+    if [[ ${latest_update_event_timestamp} -gt ${latest_create_event_timestamp} ]]; then
+        last_event=${latest_update_event_date}
+    fi
+fi
+
+# check for deletes of existing deployments since last check
+deletes_since_last_check=$(jq '.Tables[0].Rows | length' < bosh_events_delete_deployment.json)
+if [[ ${deletes_since_last_check} -gt 0 ]]; then
+    latest_delete_event_date=$(jq -r '.Tables[0].Rows[0].time' < bosh_events_delete_deployment.json)
+    latest_delete_event_timestamp=$(date -d "${latest_delete_event_date}" +%s)
+    if [[ ${latest_delete_event_timestamp} -gt ${latest_create_event_timestamp} && ${latest_delete_event_timestamp} -gt ${latest_update_event_timestamp} ]]; then
+        last_event=${latest_delete_event_date}
+    fi
+fi
+
+echo "[{\"last_event\": \"${last_event}\"}]" >&3
+
+exit 0
