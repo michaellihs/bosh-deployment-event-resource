@@ -2,7 +2,7 @@
 
 A [Concourse](http://concourse.ci/) resource to trigger pipelines based on create/update/delete deployment events on a [BOSH](http://bosh.io) Director. The main use case is to trigger backup pipelines whenever there are deployment changes.
 
-**Warning This resource is currently experimental. It can trigger your backup pipeline for no apparent reason or not trigger your backup despite numerous good reasons. Nevertheless, feel free to take it for a spin and let me know if it works for you!**
+**WARNING: This resource is currently experimental. It can trigger your backup pipeline for no apparent reason or not trigger your backup despite numerous good reasons. Nevertheless, feel free to take it for a spin and let me know if it works for you!**
 
 ## Source Configuration
 
