@@ -10,7 +10,7 @@ source $(dirname $0)/common.sh
 bosh events --object-type=deployment --after="${previous_backup}" --json > bosh_events.json
 
 # produce a changelog (metadata) by returning date+action+deployment for successfully completed events
-metadata=$(jq '[.Tables[0].Rows[] | select(.id | contains(" <- ")) | select(.error == "" ) | {name: .time, value: ("Deployment `" + .deployment + "` " + .action + "ed")} ]' < bosh_events.json)
+metadata=$(jq '[.Tables[0].Rows[] | select(.id | contains(" <- ")) | select(.error == "" ) | {name: .time, value: ("Deployment `" + .deployment + "` " + .action + "d")} ]' < bosh_events.json)
 
 echo "{ \"version\" : { \"last_event\": \"${current_version}\", \"previous_backup\": \"${previous_backup}\" }, \"metadata\": ${metadata} }" >&3
 
