@@ -1,2 +1,4 @@
 build-and-push.sh
 test
+bosh
+bosh_events.json
