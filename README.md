@@ -4,6 +4,10 @@ A [Concourse](http://concourse.ci/) resource to trigger pipelines based on creat
 
 **WARNING: This resource is currently experimental. It can trigger your backup pipeline for no apparent reason or not trigger your backup despite numerous good reasons. Nevertheless, feel free to take it for a spin and let me know if it works for you!**
 
+## Known Issues
+This resource will emit metadata which lists deployment changes. However, due to Concourse's architecture it may not perfectly reflect the content of the backup.
+This is because the metadata is collected during resource GET but backup is performed by your pipeline later (how much later depends on multiple factors, including what steps are there in your pipeline). Therefore some tasks can complete between the moment GET was executed and when the actual backup was taken and therefore the backup can contain changes not listed in the metadata.
+
 ## Source Configuration
 
 | Field  | Required | Type   | Description
