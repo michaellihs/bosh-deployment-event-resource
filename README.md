@@ -14,6 +14,7 @@ This is because the metadata is collected during resource GET but backup is perf
 | client    | Y    | String | BOSH client (eg. admin)
 | client_secret | Y| String | BOSH client's secret (password)
 | ca_cert   | Y    | String | BOSH Director CA Cert (as you would provide for BOSH CLI)
+| excluded_deployments   | N    | Array | Deployment names that should be ignored (eg. ["bat", "dummy"])
 
 ## Behavior
 
@@ -49,6 +50,7 @@ resources:
       -----BEGIN CERTIFICATE-----
       ...
       -----END CERTIFICATE-----
+    excluded_deployments: ["dummy", "bat"]
 ```
 
 ### Plan

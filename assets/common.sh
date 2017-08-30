@@ -15,5 +15,8 @@ if [[ -z "${BOSH_ENVIRONMENT}" || -z "${BOSH_CLIENT}" || -z "${BOSH_CLIENT_SECRE
   exit 1
 fi
 
+excluded_deployments=$(jq -r '.source.excluded_deployments // "[]"' < ${payload})
+export excluded_deployments
+
 current_version=$(jq -r '.version.last_event // "0"' < ${payload})
 previous_backup=$(jq -r '.version.previous_backup // "0"' < ${payload})

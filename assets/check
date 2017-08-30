@@ -10,7 +10,8 @@ source $(dirname $0)/common.sh
 bosh events --object-type=deployment --after="${current_version}" --json > bosh_events.json
 
 # search for successfully finished tasks (error field empty, ID contains an arrow)
-events_since_last_check=$(jq '[.Tables[0].Rows[] | select(.id | contains(" <- ")) | select(.error == "" )] | length' < bosh_events.json)
+events_since_last_check=$(jq --argjson excluded "${excluded_deployments}" '[.Tables[0].Rows[] | select(.id | contains(" <- ")) | select(.error == "" ) | select ([.deployment] | inside($excluded) | not)] | length' < bosh_events.json)
+
 # if there were such events - get the date of the most recent event BOSH returned
 if [[ ${events_since_last_check} -gt 0 ]]; then
     most_recent_event_date=$(jq -r '.Tables[0].Rows[0].time' < bosh_events.json)
